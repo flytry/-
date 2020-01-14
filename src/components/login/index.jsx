@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
-import {Form,Input,Button,Icon} from 'antd';
+import {Form,Input,Button,Icon,message} from 'antd';
+import {connect} from 'react-redux';
+import {saveUserAsync }from '../../redux/actions';
 
 import logo from './logo.png';
 import './index.less';
 
+const {Item} =Form;
+@connect(null,{saveUserAsync})
 @Form.create()
 class Login extends Component {
   validator= (rule,value,callback) => {
@@ -19,19 +23,49 @@ class Login extends Component {
       callback(`${name}只能包含英文、数字。下划线`);
     }
     callback();
-  }
+  };
+
+  login= e =>{
+    e.preventDefault();
+    this.props.form.validateFields((err,values)=>{
+      if(!err){
+        const {username,password} =values;
+        // axios.post('/api/login',{ username,password })
+        //   .then(response =>{
+        //     if(response.data.status === 0){
+        //       this.props.history.replace('/');
+        //     }else{
+        //       message.error(response.data.msg);
+        //       this.props.form.resetFields(['password']);
+        //     }
+        //   })
+        //   .catch( err => {
+        //     message.error('网络错误');
+        //     this.props.form.resetFields(['password']);
+        //   });
+        this.props.saveUserAsync(username,password)
+          .then(()=>{
+            this.props.history.replace('/')
+          })
+          .catch(msg=>{
+            message.error(msg);
+            this.props.form.resetFields(['password']);
+          })
+      }
+    });
+  };
   render() {
     const { getFieldDecorator } = this.props.form;
 
-    return <div className="login">
-      <header className="login-header">
-        <img src={logo} alt="logo"/>
+    return <div className='login'>
+      <header className='login-header'>
+        <img src={logo} alt='logo'/>
         <h1>React项目：后台管理系统</h1>
       </header>
-      <section className="login-section">
+      <section className='login-section'>
         <h3>用户登录</h3>
-        <Form className="login-form">
-          <Form.Item>
+        <Form className='login-form' onSubmit={this.login}>
+          <Item>
             {
               getFieldDecorator(
                 'username',
@@ -60,14 +94,14 @@ class Login extends Component {
                 }
               )(
                 <Input prefix={
-                  <Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />
+                  <Icon type='user' style={{ color: 'rgba(0,0,0,.25)' }} />
                 } 
-                  placeholder="用户名"
+                  placeholder='用户名'
                   />
               )
             }
-          </Form.Item>
-          <Form.Item>
+          </Item>
+          <Item>
             {
             getFieldDecorator(
               'password',
@@ -80,16 +114,16 @@ class Login extends Component {
               }
             )(
               <Input prefix={
-                <Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />
+                <Icon type='lock' style={{ color: 'rgba(0,0,0,.25)' }} />
               } 
                 placeholder='密码'
                 />
             )
             }
-          </Form.Item>
-          <Form.Item>
-            <Button className="login-form-btn" type="primary"></Button>
-          </Form.Item>
+          </Item>
+          <Item>
+            <Button className='login-form-btn' type='primary' htmlType='submit'>登录</Button>
+          </Item>
         </Form>
       </section>
     </div>
